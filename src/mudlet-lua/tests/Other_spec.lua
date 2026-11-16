@@ -726,13 +726,11 @@ describe("Tests Other.lua functions", function()
         assert(waitForEvent("speedwalkSpecSettled", timeoutMs or 5000))
       end
 
-      -- These are the first specs in this file to run the event loop, so whatever earlier spec files left
-      -- queued runs inside the first wait; on a slow CI runner that ate the 5 s a walk of three 10 ms steps had
-      setup(function()
-        settle(30000)
-      end)
-
       it("leaves nothing to pause or stop once a delayed walk has finished", function()
+        -- The first spec in this file to run the event loop, so whatever earlier spec files left queued runs
+        -- inside its first wait; on a slow CI runner that ate the 5 s a walk of three 10 ms steps had. Not a
+        -- setup(): a WebAssembly build fires no timer inside waitForEvent, and a failed hook skips the block
+        settle(30000)
         assert.is_true(speedwalk("n;e;s", false, 0.01))
         assert.are.equal("sysSpeedwalkFinished", waitForEvent("sysSpeedwalkFinished", 5000))
         assert.are.same({"n", "e", "s"}, sent)
